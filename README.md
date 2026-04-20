@@ -1,4 +1,4 @@
-<img width="1918" height="912" alt="Screenshot 2026-04-21 010202" src="https://github.com/user-attachments/assets/57532a18-6b4e-4531-a590-33cf69213e02" />
+
 #  Language Identification from Short Audio Clips Using MFCC and Classical ML
 
 > **Project #39 — Predictive Analytics (AY 2025-26)**
