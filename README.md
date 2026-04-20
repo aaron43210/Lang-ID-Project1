@@ -1,3 +1,4 @@
+<img width="1918" height="912" alt="Screenshot 2026-04-21 010202" src="https://github.com/user-attachments/assets/57532a18-6b4e-4531-a590-33cf69213e02" />
 #  Language Identification from Short Audio Clips Using MFCC and Classical ML
 
 > **Project #39 — Predictive Analytics (AY 2025-26)**
@@ -114,6 +115,9 @@ After feature selection (variance thresholding + mutual information), the most d
 ## 🌐 Live App
 
 🔗 **[Try the deployed Streamlit app →](https://language-project1.streamlit.app)**
+<img width="1918" height="912" alt="Streamlit_app_image" src="https://github.com/user-attachments/assets/cde4fe79-798e-482d-b5bf-a8e45c06c70c" />
+
+
 
 Upload a short audio clip (WAV format, 3–10 seconds) and get real-time language predictions with confidence scores.
 
