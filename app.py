@@ -160,6 +160,22 @@ def extract_features(y):
 
     return np.array(features, dtype=np.float32).reshape(1, -1)
 
+def validate_audio_quality(y, sr):
+    warnings_list = []
+    duration = len(y) / sr
+
+    if duration < 2.0:
+        warnings_list.append(("⚠️ Too Short", "Speak for at least 3–5 seconds"))
+    
+
+    rms = np.sqrt(np.mean(y ** 2))
+    if rms < 0.001:
+        warnings_list.append(("🔇 Quiet", "Audio is too low"))
+    if rms > 0.9:
+        warnings_list.append(("📢 Clipping", "Audio distorted"))
+
+    return warnings_list
+
 # App UI
 st.title("🗣️ Language Identification Expert System")
 st.markdown("---")
@@ -203,6 +219,7 @@ if audio_bytes:
     
     try:
         y, sr = librosa.load(path, sr=SAMPLE_RATE)
+        quality_issues = validate_audio_quality(y, sr)
         y_proc = preprocess_audio(y, sr)
         raw_feats = extract_features(y_proc)
         
@@ -223,16 +240,36 @@ if audio_bytes:
             plt.tight_layout()
             st.pyplot(fig)
             st.audio(path)
+            if quality_issues:
+                for title, msg in quality_issues:
+                    st.warning(f"{title}: {msg}")
 
         with col2:
             model = models[selected_model_name]
             probas = model.predict_proba(final_feats)[0]
             best_idx = np.argmax(probas)
-            
+            lang_color = LANGUAGE_COLORS.get(LANGUAGES[best_idx], '#2ECC71')
+            confidence = probas[best_idx] * 100
             st.markdown(f"""
-                <div class='predict-box'>
-                    <h3>Primary Prediction: {LANGUAGES[best_idx]}</h3>
-                    <p>Confidence: <b>{probas[best_idx]*100:.2f}%</b></p>
+                <div style="
+                    padding:20px 28px;
+                    border-radius: 16px;
+                    background: linear-gradient(135deg, #0f1923, #1a2a3a);
+                    border-left: 8px solid {lang_color};
+                    margin-bottom: 20px;
+                    box-shadow: 0 4px 15px rgba(0,0,0,0.3);
+                ">
+
+                   <p style="color:#aab4be; font-size:13px; margin:0 0 6px 0; letter-spacing:1.5px; text-transform:uppercase;">
+                      Detected Language
+                   </p>
+                   <h1 style="color:{lang_color}; font-size:36px; margin:0 0 12px 0; font-weight:800;">
+                       {LANGUAGES[best_idx]}
+                   </h1>
+                   <p style="color:#ffffff; font-size:15px; margin:0;">
+                      Confidence: <b style="color:{lang_color};">{confidence:.1f}%</b>
+                   </p> 
+                    
                 </div>
                 """, unsafe_allow_html=True)
             
@@ -271,6 +308,26 @@ if audio_bytes:
                     idx = np.argmax(p)
                     comp_data.append({"Model": name, "Prediction": LANGUAGES[idx], "Confidence": f"{p[idx]*100:.2f}%"})
                 st.table(pd.DataFrame(comp_data))
+                       
+                        # --- Download Report ---
+        st.markdown("### 📥 Download Prediction Report")
+
+        report = {
+            "Prediction": LANGUAGES[best_idx],
+            "Confidence (%)": float(probas[best_idx]) * 100
+        }
+        
+        df_report = pd.DataFrame([{
+            "Prediction": LANGUAGES[best_idx],
+            "Confidence (%)": round(float(probas[best_idx]) * 100, 2),
+            **{f"P({lang}) (%)": round(float(prob) * 100, 2) for lang, prob in zip(LANGUAGES, probas)}
+}])
+        st.download_button(
+            label="⬇️ Download CSV",
+            data=df_report.to_csv(index=False),
+            file_name="lid_report.csv",
+            mime="text/csv"
+        )
     except Exception as e:
         import traceback
         st.error(f"Error processing audio: {e}")
