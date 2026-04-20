@@ -112,6 +112,14 @@ After feature selection (variance thresholding + mutual information), the most d
 
 ---
 
+##  Limitations
+
+-The model may struggle with noisy or low-quality audio recordings.
+-It can confuse similar languages such as Malayalam, Tamil, and Kannada due to similar sound patterns.
+- The model is trained on a limited dataset (~5000 samples), so performance may drop on new unseen data.
+-Classical machine learning models may not capture complex audio patterns as well as deep learning models.
+
+---
 ## 🌐 Live App
 
 🔗 **[Try the deployed Streamlit app →](https://language-project1.streamlit.app)**
